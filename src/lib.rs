@@ -1,10 +1,32 @@
+//! Hashell function ported from from scratch to rust (see <https://scratch.mit.edu/projects/683935277/>).
+//! This function can fail to compute hash in some untested corner cases, but generally it works
+//! fine with most values.
+//!
+//! # Example
+//! ```
+//! use hashell::hash_string;
+//!
+//! fn main() {
+//!     assert_eq!(hash_string("some value", 16), "5149710603511119".to_owned());
+//! }
+//! ```
+
 use std::collections::vec_deque::VecDeque;
 
 mod consts;
 use crate::consts::*;
 
+/// Convenience function for hashing values
+pub fn hash_string(input: &str, hash_length: u32) -> String {
+    let hasher = Hashell::new(hash_length);
+    hasher.digest(input)
+}
+
 type EncodedHash = String;
 
+/// Hashing function that produces fixed length hashes
+///
+/// You need to provide hash length to work with it
 pub struct Hashell {
     out_len: u32,
 }
@@ -16,6 +38,13 @@ impl Hashell {
         }
     }
 
+    /// Compute fixed length hash from provided value
+    ///
+    /// # Panics
+    /// This function can panic in several scenarios, which include:
+    /// - Empty input string
+    /// - Input string containing characters that are not defined in hashell alphabet
+    /// - Untested corner case input strings
     pub fn digest(&self, input: &str) -> String {
         if input.len() == 0 {
             panic!("Function cannot be computed for empty strings!");
