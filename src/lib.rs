@@ -472,7 +472,7 @@ impl Hashell {
         }
     }
 
-    pub fn digest(&self, input: &str) -> Vec<u8> {
+    pub fn digest(&self, input: &str) -> String {
         if input.len() == 0 {
             panic!("Function cannot be computed for empty strings!");
         }
@@ -499,10 +499,10 @@ impl Hashell {
             })
     }
 
-    fn hash_number(&self, inp: EncodedHash) -> Vec<u8> {
+    fn hash_number(&self, inp: EncodedHash) -> String {
         let mut hash_history = VecDeque::new();
         //let mut test = vec![];
-        let mut hash = Vec::with_capacity(self.out_len as usize);
+        let mut hash = String::with_capacity(self.out_len as usize);
         let parsed_inp = inp.parse::<f64>().unwrap();
 
         let mut pair_left = inp.chars().cycle().skip(2).step_by(6);
@@ -642,16 +642,17 @@ impl Hashell {
                 .to_digit(10)
                 .unwrap();
 
+            let hash_range = hash.len()..=hash.len();
             if vec_get(&hash_history, 0) % 2 == inp_val % 2 {
-                hash.push(((vec_get(&hash_history, 0) as f64 / 10.0).round() as u32 % 10) as u8);
-                let hash_letter = hash.last().unwrap(); //hash[hash_range].parse().expect("parsed slice");
-                for _ in 0..*hash_letter {
+                hash.push_str(((vec_get(&hash_history, 0) as f64 / 10.0).round() as u32 % 10).to_string().as_str());
+                let hash_letter = hash[hash_range].parse().expect("parsed slice");
+                for _ in 0..hash_letter {
                     hash_history.insert(hash_history.len() - 4, vec_get(&hash_history, 3));
                     hash_history.remove(3);
                 }
             } else {
-                hash.push((vec_get(&hash_history, 0) % 10) as u8);
-                let hash_letter = *hash.last().unwrap() as usize; //hash[hash_range].parse().expect("parsed slice");
+                hash.push_str((vec_get(&hash_history, 0) % 10).to_string().as_str());
+                let hash_letter = hash[hash_range].parse().expect("parsed slice");
                 for _ in 0..4 {
                     hash_history.push_back(vec_get(&hash_history, hash_letter));
                     hash_history.remove(hash_letter);
@@ -689,13 +690,6 @@ fn find_in_alphabet(char: char) -> Option<u32> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn collect_vector(inp: Vec<u8>) -> String {
-        inp.iter()
-            .fold(String::with_capacity(inp.len()), |acc, val| {
-                acc + val.to_string().as_str()
-            })
-    }
 
     #[test]
     fn test_alphabet() {
@@ -747,51 +741,51 @@ mod tests {
 
         assert_eq!(
             "0555279339417795".to_owned(),
-            collect_vector(hashell.digest("3483488345939349"))
+            hashell.digest("3483488345939349")
         );
 
         assert_eq!(
             "3973351530153453".to_owned(),
-            collect_vector(hashell.digest("0"))
+            hashell.digest("0")
         );
 
         assert_eq!(
             "1095160231297737".to_owned(),
-            collect_vector(hashell.digest("1"))
+            hashell.digest("1")
         );
 
         let hashell = Hashell::new(15);
 
         assert_eq!(
             "755539785697931".to_owned(),
-            collect_vector(hashell.digest("394334512383894"))
+            hashell.digest("394334512383894")
         );
 
         assert_eq!(
             "933097009979939".to_owned(),
-            collect_vector(hashell.digest("8778484646941145632546"))
+            hashell.digest("8778484646941145632546")
         );
 
         assert_eq!(
             "736348119714255".to_owned(),
-            collect_vector(hashell.digest("asrgaeфыкрфкр4984612"))
+            hashell.digest("asrgaeфыкрфкр4984612")
         );
 
         let hashell = Hashell::new(120);
 
         assert_eq!(
             "678779357945397196395199965043199010191399199043079718719201731813323999879713959292058944979749150493093286654673351543".to_owned(),
-            collect_vector(hashell.digest("394334512383894"))
+            hashell.digest("394334512383894")
         );
 
         assert_eq!(
             "914937769319477494315979533594219379210994159831194102531133189333595613942051627930572350359741979903311599949173916579".to_owned(),
-            collect_vector(hashell.digest("8778484646941145632546"))
+            hashell.digest("8778484646941145632546")
         );
 
         assert_eq!(
             "943891315585135305317517730943583572837303418114493569641982101018331964979535915753136415018093539879929973199912995333".to_owned(),
-            collect_vector(hashell.digest("asrgaeфыкрфкр4984612"))
+            hashell.digest("asrgaeфыкрфкр4984612")
         );
     }
 
