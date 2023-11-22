@@ -365,7 +365,12 @@ mod tests {
     #[test]
     #[should_panic]
     fn hash_empty_string() {
-        let hasher = Hashell::new(10);
-        hasher.digest("");
+        hash_string("", 10);
+    }
+
+    #[test]
+    #[should_panic]
+    fn hash_invalid_string() {
+        hash_string("ABCDEF", 10);
     }
 }
